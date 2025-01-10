@@ -115,7 +115,7 @@ HTTP/1.1 规范定义了如下 47 种首部字段。
 
 指令的参数是可选的，多个指令之间通过 "." 分隔。首部字段 Cache-Control 的指令可用于请求及响应时。
 
-```http
+```
 Cache-Control: private, max-age=0, no-cache
 ```
 
@@ -161,7 +161,7 @@ Cache-Control: private, max-age=0, no-cache
 
 **`public 指令`**
 
-```http
+```
 Cache-Control: public
 ```
 
@@ -169,13 +169,55 @@ Cache-Control: public
 
 **`private 指令`**
 
-```http
+```
 Cache-Control: private
 ```
 
-当指定 private 指令后，响应只以特定的用户作为对象，这与 public 指令的行为相反。缓存服务器会对该特定用户提供资源缓存的服务，对于其他用户发送过来的请求，代理服务器则不会返回缓存。
+当指定 private 指令后，响应只以特定的用户作为对象，这与 public 指令的行为相反。**`缓存服务器会对该特定用户提供资源缓存的服务`** ，对于其他用户发送过来的请求，代理服务器则不会返回缓存。
+
+**`no-cache 指令`**
+
+```
+Cache-Control: no-cache
+```
+
+使用 no-cache 指令的目的是为了防止从缓存中返回过期的资源。客户端发送的请求中如果包含 no-cache 指令，则表示客户端将不会接收缓存过的响应。于是，中间的缓存服务器必须把客户端请求转发给源服务器。
 
 
+
+**`控制可执行缓存的对象的指令`**
+
+**`no-store 指令`**
+
+```
+Cache-Control: no-store
+```
+
+当使用 **`no-store`** 指令时，暗示请求或响应中包含机密信息。因此，该指令规定缓存不能在本地储存请求或响应的任一部分。
+
+
+
+从字面意思上很容易把 no-cache 误解成为不缓存，**`但事实上 no-cache 代表不缓存过期的资源，缓存会向源服务器进行有效期确认后处理资源`** 。 **`no-store 才是真正地不进行缓存`** 。
+
+
+
+**`指定缓存期限和认证的指令`**
+
+**`s-maxage 指令`**
+
+```
+Cache-Control: s-maxage=604800（单位：秒）
+```
+
+另外，当使用 **`s-maxage`** 指令后，则直接忽略对 **`Expires`** 首部字段及 **`max-age`** 指令的处理。 
+
+
+
+**`max-age 指令`**
+
+```
+Cache-Control: max-age=604800（单位：秒）
+```
 
 
 
