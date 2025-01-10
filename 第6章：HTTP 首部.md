@@ -115,7 +115,7 @@ HTTP/1.1 规范定义了如下 47 种首部字段。
 
 指令的参数是可选的，多个指令之间通过 "." 分隔。首部字段 Cache-Control 的指令可用于请求及响应时。
 
-```
+```http
 Cache-Control: private, max-age=0, no-cache
 ```
 
@@ -161,7 +161,7 @@ Cache-Control: private, max-age=0, no-cache
 
 **`public 指令`**
 
-```
+```http
 Cache-Control: public
 ```
 
@@ -169,7 +169,7 @@ Cache-Control: public
 
 **`private 指令`**
 
-```
+```http
 Cache-Control: private
 ```
 
@@ -177,7 +177,7 @@ Cache-Control: private
 
 **`no-cache 指令`**
 
-```
+```http
 Cache-Control: no-cache
 ```
 
@@ -189,7 +189,7 @@ Cache-Control: no-cache
 
 **`no-store 指令`**
 
-```
+```http
 Cache-Control: no-store
 ```
 
@@ -205,7 +205,7 @@ Cache-Control: no-store
 
 **`s-maxage 指令`**
 
-```
+```http
 Cache-Control: s-maxage=604800（单位：秒）
 ```
 
@@ -215,7 +215,7 @@ Cache-Control: s-maxage=604800（单位：秒）
 
 **`max-age 指令`**
 
-```
+```http
 Cache-Control: max-age=604800（单位：秒）
 ```
 
