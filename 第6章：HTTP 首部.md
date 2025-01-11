@@ -219,7 +219,186 @@ Cache-Control: s-maxage=604800（单位：秒）
 Cache-Control: max-age=604800（单位：秒）
 ```
 
+当客户端发送的请求中包含 max-age 指令时，如果判定缓存资源的缓存时间数值比指定时间的数值更小，那么客户端就接收缓存的资源。另外，当指定 max-age 值为 0，那么 **`缓存服务器通常需要将请求转发给源服务器`** 。当服务器返回的响应中包含 max-age 指令时，缓存服务器将不对资源的有效性再做确认，而 max-age 数值代表资源保存为 **`缓存的最长时间`** 。应用 HTTP/1.1 版本的缓存服务器遇到同时存在 Expires 首部字段的情况时， **`会优先处理 max-age 指令，而忽略掉 Expires 首部字段`** 。而 HTTP/1.0 版本的缓存服务器的情况却相反，max-age 指令会被忽略掉。
 
 
 
+#### 2. Connection
 
+Connection 首部字段具备如下两个作用：
+
+* 控制不再转发给代理的首部字段
+* 管理持久连接
+
+* 控制代理不再转发的首部字段
+
+```http
+Connection: 不再转发的首部字段名
+```
+
+在客户端发送请求和服务器返回响应内，使用 Connection 首部字段，可控制不再转发给代理的首部字段（即 Hop-by-hop 首部）。
+
+* 管理持久连接
+
+```http
+Connection: close
+```
+
+HTTP/1.1 版本的默认连接都是 **`持久连接`** 。为此，客户端会在持久连接上连续发送请求。当服务器端想明确断开连接时，则指定 Connection 首部字段的值为 Close。HTTP/1.1 之前的 HTTP 版本的默认连接都是 **`非持久连接`** 。为此，如果想在旧版本的 HTTP 协议上维持持续连接，则需要指定 Connection 首部字段的值为 **`Keep-Alive`** 。
+
+
+
+#### 3. Date
+
+首部字段 Date 表明创建 HTTP 报文的日期和时间。HTTP/1.1 协议使用在 RFC1123 中规定的日期时间的格式，如下示例。
+
+```http
+Date: Tue, 03 Jul 2012 04:40:59 GMT
+```
+
+
+
+#### 4. Pragma
+
+Pragma 是 HTTP/1.1 之前版本的历史遗留字段，仅作为与 HTTP/1.0 的向后兼容而定义。规范定义的形式唯一，如下所示：
+
+```http
+Pragma: no-cache
+```
+
+该首部字段属于通用首部字段，但只用在客户端发送的请求中。客户端会要求 **`所有的中间服务器不返回缓存的资源`** 。所有的中间服务器如果都能以 HTTP/1.1 为基准，那直接采用 Cache-Control: no-cache 指令缓存的处理方式是最为理想的。但要 **`整体掌握全部中间服务器使用的 HTTP 协议版本却是不现实的`** 。因此，发送的请求同时含有下面两个首部字段。
+
+```http
+Cache-Control: no-cache
+Pragma: no-cache
+```
+
+
+
+#### 5. Trailer
+
+首部字段 Trailer 会事先说明在报文主体后记录了哪些首部字段。该首部字段可应用在 HTTP/1.1 版本分块传输编码时。
+
+
+
+#### 6. Transfer-Encoding
+
+首部字段 Transfer-Encoding 规定了传输报文主体时采用的编码方式。
+
+
+
+#### 7. Upgrade
+
+首部字段 Upgrade 用于检测 HTTP 协议及其他协议是否可使用更高版本进行通信，其参数值可以用来指定一个完全不同的通信协议。                                                                                                                                                                                                                                                                                                                                                               
+
+
+
+#### 8. Via
+
+使用首部字段 Via 是为了追踪客户端与服务器之间的请求和响应报文的传输路径。
+
+
+
+#### 9. Warning
+
+HTTP/1.1 的 Warning 首部是从 HTTP/1.0 的响应首部演变过来的。该首部通常会 **`告知用户一些与缓存相关的问题的警告`** 。
+
+```http
+Warning: 113 gw.hackr.jp:8080 "Heuristic expiration" Tue, 03 Jul => 2012 05:09:44 GMT
+```
+
+Warning 首部的格式如下。最后的日期时间部分可省略。
+
+```http
+Warning: [警告码] [警告的主机:端口号] "[警告内容]" ([日期时间])
+```
+
+
+
+* **`HTTP/1.1 警告码`**
+
+| 警告码 | 警告内容                                         | 说明                                                         |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------ |
+| 110    | Response is stale（响应已过期）                  | 代理返回已过期的资源                                         |
+| 111    | Revalidation failed（再验证失败）                | 代理再验证资源有效性时失败（服务器无法到达等原因）           |
+| 112    | Disconnection operation（断开连接操作）          | 代理与互联网连接被故意切断                                   |
+| 113    | Heuristic expiration（试探性过期）               | 响应的使用期超过 24 小时（有效缓存的设定时间大于 24 小时的情况下） |
+| 199    | Miscellaneous warning（杂项警告）                | 任意的警告内容                                               |
+| 214    | Transformation applied（使用了转换）             | 代理对内容编码或媒体类型等执行了某些处理时                   |
+| 299    | Miscellaneous persistent warning（持久杂项警告） | 任意的警告内容                                               |
+
+
+
+### 6.4 请求首部字段
+
+
+
+#### 1. Accept
+
+```http
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+```
+
+Accept 首部字段可通知服务器， **`用户代理能够处理的媒体类型及媒体类型的相对优先级`** 。可使用 type/subtype 这种形式，一次指定多种媒体类型。下面我们试举几个媒体类型的例子。
+
+* **`文本文件`** 
+
+​	text/html,text/plain,text/css ...
+
+​	application/xhtml+xml,application/xml ...
+
+* **`图片文件`**
+
+  image/jpeg,image/gif,image/png ...
+
+* **`视频文件`**
+
+  video/mpeg,video/quicktime ...
+
+* **`应用程序使用的二进制文件`**
+
+​	application/octet-stream,application/zip ...
+
+比如，如果浏览器不支持 PNG 图片的显示，那 Accept 就不指定 image/png，而指定可处理的 image/gif 和 image/jpeg 等图片类型。若想要给显示的媒体类型增加优先级，则使用 q= 来额外表示权重值，用分号 **`（;）`** 进行分隔。**`权重值 q 的范围是 0 ~ 1（可精确到小数点后 3 位）`** ，且 1 为最大值。不指定权重 q 值时，默认权重为 q=1.0。当服务器提供多种内容时，将会首先返回权重值最高的媒体类型。
+
+
+
+#### 2. Accept-Charset
+
+```http
+Accept-Charset: iso-8859-5, unicode-1-1;q=0.8
+```
+
+Accept-Charset 首部字段可用来通知 **`服务器用户代理支持的字符集及字符集的相对优先顺序`** 。另外，可一次性指定多种字符集。与首部字段 Accept 相同的是可用权重 q 值来表示相对优先级。 **`该首部字段应用于内容协商机制的服务器驱动协商`** 。
+
+
+
+#### 3. Accept-Encoding
+
+```http
+Accept-Encoding: gzip, deflate
+```
+
+Accept-Encoding 首部字段用来告知服务器用户代理支持的内容编码及内容编码的优先级顺序。可一次性指定多种内容编码。下面试举出几个内容编码的例子。
+
+* **`gzip`**
+
+  由文件压缩程序 gzip（GNU zip）生成的编码格式，采用 Lempel-Ziv 算法及 32 位循环冗余校验。
+
+* **`compress`**
+
+* **`deflate`**
+
+* **`identity`**
+
+采用权重 q 值来表示相对优先级，这点与首部字段 Accept 相同。另外，也可使用星号 **`（*）`** 作为通配符，指定 **`任意的编码格式`** 。
+
+
+
+#### 4. Accept-Language
+
+```http
+Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3
+```
+
+首部字段 Accept-Language 用来告知 **`服务器用户代理能够处理的自然语言集`** ，以及自然语言集的相对优先级。可一次指定多种自然语言集。和 Accept 首部字段一样，按权重值 q 来表示相对优先级。在上述图例中，客户端在服务器有中文版资源的情况下，会请求其返回中文版对应的响应，没有中文版时，则请求返回英文版的响应。
