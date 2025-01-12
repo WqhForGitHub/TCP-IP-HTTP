@@ -402,3 +402,204 @@ Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3
 ```
 
 首部字段 Accept-Language 用来告知 **`服务器用户代理能够处理的自然语言集`** ，以及自然语言集的相对优先级。可一次指定多种自然语言集。和 Accept 首部字段一样，按权重值 q 来表示相对优先级。在上述图例中，客户端在服务器有中文版资源的情况下，会请求其返回中文版对应的响应，没有中文版时，则请求返回英文版的响应。
+
+
+
+#### 5. Authorization
+
+```http
+Authorization: Basic dWVub3NlbjpwYXNzd29yZA==
+```
+
+首部字段 Authorization 是用来告知服务器， **`用户代理的认证信息`** 。通常，想要通过服务器认证的用户代理会在接收到返回的 401 状态码响应后，把首部字段 Authorization 加入请求中。共用缓存在接收到含有 Authorization 首部字段的请求时的操作处理会略有差异。
+
+
+
+#### 6. Expect
+
+```http
+Expect: 100-continue
+```
+
+客户端使用首部字段 Expect 来告知服务器， **`期望出现的某种特定行为`** 。
+
+
+
+#### 7. From
+
+首部字段 From 用来告知服务器使用 **`用户代理的用户的电子邮件地址`** 。通常，其使用目的就是为了显示搜索引擎等用户代理的负责人的电子邮件联系方式。                                                                                                                                                                                                                                                                                                                                                                     
+
+
+
+#### 8. Host
+
+```http
+Host: www.hackr.jp
+```
+
+首部字段 Host 会告知服务器， **`请求的资源所处的互联网主机名和端口号`** 。Host 首部字段在 HTTP/1.1 规范内是唯一一个必须被包含在请求内的首部字段。
+
+
+
+#### 9. If-Match
+
+形如 If-xxx 这种样式的请求首部字段，都可称为 **`条件请求`** 。服务器接收到附带条件的请求后，只有判断指定条件为真时，才会执行请求。
+
+**`只有当 If-Match 的字段值跟 ETag 值匹配一致时，服务器才会接受请求`** 。
+
+```http
+If-Match: "123456"
+```
+
+首部字段 If-Match ，属附带条件之一，它会告知 **`服务器匹配资源所用的实体标记值`** 。这时的服务器无法使用弱 ETag 值。服务器会比对 If-Match 的字段值和资源的 ETag 值，仅当两者一致时，才会执行请求。反之，则返回状态码 412 的响应。还可以使用星号 **`（*）`** 指定 If-Match 的字段值。针对这种情况，服务器将会忽略 ETag 的值，只要资源存在就处理请求。                                                                                                              
+
+
+
+#### 10. If-Modified-Since
+
+如果在 If-Modified-Since 字段指定的日期时间后， **`资源发生了更新，服务器会接受请求`** 。
+
+```http
+If-Modified-Since: Thu, 15 Apr 2004 00:00:00 GMT
+```
+
+If-Modified-Since 用于确认代理或客户端拥有的 **`本地资源的有效性`** 。获取资源的更新日期时间，可通过确认首部字段 **`Last-Modified`**  来确定。 
+
+
+
+#### 11. If-None-Match
+
+用于指定 If-None-Match 可获取最新的资源。因此，这与使用首部字段 If-Modified-Since 时有些类似。
+
+
+
+#### 12. If-Range
+
+   
+
+#### 13. If-Unmodified-Since
+
+
+
+#### 14. Max-Forwards
+
+```                    http
+Max-Forwards: 10
+```
+
+
+
+#### 15. Proxy-Authorization
+
+ ```http
+ Proxy-Authorization: Basic dGlwOjkpNLAGfFY5
+ ```
+
+接收到从 **`代理服务器发来的认证质询时`** ，客户端会发送包含首部字段 Proxy-Authorization 的请求，以告知 **`服务器认证所需要的信息`** 。
+
+
+
+
+
+#### 16. Range
+
+```http
+Range: bytes=5001-10000
+```
+
+对于只需获取 **`部分资源的范围请求`** ，包含首部字段 Range 即可告知服务器资源的指定范围。上面的示例表示请求获取从第 5001 字节至第 10000 字节的资源。接收到附带 Range 首部字段请求的服务器，会在处理请求之后返回状态码为 **`206 Partial Content`**  的响应。无法处理该范围请求时，则会返回状态码 **`200 OK`**  的响应及全部资源。
+
+
+
+#### 17. Referer
+
+```                                                                                                     http
+Referer: http://www.hackr.jp/index.htm
+```
+
+首部字段 Referer 会告知 **`服务器请求的原始资源的 URI`** 。客户端一般都会发送 Referer 首部字段给服务器。但当直接在浏览器的地址栏输入 URI ，或出于安全性的考虑时，也可以不发送该首部字段。
+
+
+
+#### 18. TE
+
+```http
+TE: gzip, deflate;q=0.5
+```
+
+首部字段 TE 会告知服务器 **`客户端能够处理响应的传输编码方式及相对优先级`** 。它和首部字段 Accept-Encoding 的功能很相像，但是用于传输编码。首部字段 TE 除指定传输编码之外，还可以指定伴随 **`trailer 字段的分块传输编码的方式`** 。应用后者时，只需把 trailers 赋值给该字段值。
+
+```http
+TE: trailers
+```
+
+
+
+#### 19. User-Agent
+
+```http
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:13.0) Gecko/ => 20100101 Firefox/13.0.1
+```
+
+首部字段 User-Agent 会将 **`创建请求的浏览器和用户代理名称等信息传达给服务器`** 。
+
+
+
+
+
+### 6.5 响应首部字段
+
+
+
+#### 1. Accept-Ranges
+
+```http
+Accept-Ranges: bytes
+```
+
+首部字段 Accept-Ranges 是用来告知客户端 **`服务器是否能处理范围请求`** ，以指定获取服务器端某个部分的资源。可指定的字段值有两种，可处理范围请求时指定其为 **`bytes`** ，反之则指定其为 **`none`** 。
+
+
+
+#### 2. Age
+
+```http
+Age: 600
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
