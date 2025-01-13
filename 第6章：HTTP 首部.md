@@ -567,25 +567,376 @@ Accept-Ranges: bytes
 Age: 600
 ```
 
+首部字段 Age 能告知客户端， **`源服务器在多久前创建了响应`** 。字段值的单位为秒。若创建该响应的服务器是缓存服务器，Age 值是指缓存后的响应 **`再次发起认证到认证完成的时间值`** 。代理创建响应时必须加上首部字段 Age。
+
+
+
+#### 3. ETag
+
+```http
+ETag: "82e22293907ce725faf67773957acd12"
+```
+
+首部字段 ETag 能告知 **`客户端实体标识`** 。它是一种可将资源以字符串形式做唯一性标识的方式。服务器会为每份资源分配对应的 ETag 值。另外， **`当资源更新时，ETag 值也需要更新`** 。生成 ETag 值时，并没有统一的算法规则，而仅仅是由服务器来分配。资源被缓存时，就会被分配唯一性标识。例如，当使用中文版的浏览器访问 **`http://www.google.com`** 时，就会返回中文版对应的资源，而使用英文版的浏览器访问时，则会返回英文版对应的资源。两者的 URI 是相同的，所以仅凭 URI 指定缓存的资源是相当困难的。若在下载过程中出现连接中断、再连接的情况，都会依照 ETag 值来指定资源。
+
+
+
+**强 ETag 值和弱 ETag 值**
+
+ETag 中有强 ETag 值和弱 ETag 值之分。
+
+* **`强 ETag 值`**
+
+​	强 ETag 值， **`不论实体发生多么细微的变化都会改变其值`** 。
+
+```http
+ETag: "usagi-1234"
+```
+
+
+
+* **`弱 ETag 值`**
+
+​	弱 ETag 值只用于提示资源是否相同。只有资源发生了 **`根本改变`** ， **`产生差异时才会改变 ETag 值`** 。这时，会在字段值最开始处附加 **`W/`** 。
+
+```http
+ETag: W/"usagi-1234"
+```
+
+
+
+#### 4. Location
+
+```http
+Location: http://www.usagidesign.jp/sample.html
+```
+
+使用首部字段 Location 可以将响应接收方引导至某个与 **`请求 URI 位置不同的资源`** 。基本上，该字段会配合 **`3xx：Redirection`**  的响应，提供 **`重定向的 URI`** 。几乎所有的浏览器在接收到包含首部字段 Location 的响应后， **`都会强制性地尝试对已提示的重定向资源的访问`** 。
+
+
+
+#### 5. Proxy-Authenticate
+
+```http
+Proxy-Authenticate: Basic realm="Usagidesign Auth"
+```
+
+首部字段 Proxy-Authenticate 会把 **`由代理服务器所要求的认证信息发送给客户端`** 。它与客户端和服务器之间的 HTTP 访问认证的行为相似，不同之处在于其认证行为是在客户端与代理之间进行的。而客户端与服务器之间进行认证时，首部字段 WWW-Authorization 有着相同的作用。有关 HTTP 访问认证，后面的章节会再进行详尽阐述。
+
+
+
+#### 6. Retry-After
+
+```http
+Retry-After: 120
+```
+
+首部字段 Retry-After 告知 **`客户端应该在多久之后再次发送请求`** 。主要配合状态码 **`503 Service Unavailable`**  响应，或 **`3xx Redirect`** 响应一起使用。字段值可以指定为具体的日期时间（Wed, 04 Jul 2012 06:34:24 GMT 等格式），也可以是 **`创建响应后的秒数`** 。
+
+
+
+#### 7. Server
+
+```http
+Server: Apache/2.2.17 （Unix）
+```
+
+首部字段 Server 告知客户端当前服务器上安装的 **`HTTP 服务器应用程序的信息`** 。不单单会标出 **`服务器上的软件应用名称`** ，还有可能 **`包括版本号和安装时启用的可选项`** 。
+
+```http
+Server: Apache/2.2.6 （Unix） PHP/5.2.5
+```
+
+
+
+#### 8. Vary
+
+```http
+Vary: Accept-Language
+```
+
+首部字段 Vary 可对 **`缓存进行控制`** 。源服务器会向代理服务器传达关于本地缓存使用方法的命令。从代理服务器接收到源服务器返回包含 Vary 指定项的响应之后，若再要进行缓存，仅对请求中含有相同 Vary 指定首部字段的请求返回缓存。即使对相同资源发起请求，但由于 Vary 指定的首部字段不相同，因此必须要从源服务器重新获取资源。
+
+
+
+#### 9. WWW-Authenticate
+
+```                                                                                                                                                                                                     http
+WWW-Authenticate: Basic realm="Usagidesign Auth"
+```
+
+首部字段 WWW-Authenticate 用于 **`HTTP 访问认证`** 。它会告知客户端适用于访问请求 URI 所指定资源的认证方案（Basic 或是 Digest）和带参数提示的质询（challenge）。状态码 401 Unauthorized 响应中，肯定带有首部字段 WWW-Authenticate。上述示例中，realm 字段的字符串是为了辨别请求 URI 指定资源所受到的保护策略。有关该首部，请参阅本章之后的内容。
 
 
 
 
 
+### 6.6 实体首部字段
+
+
+
+#### 1. Allow
+
+```http
+Allow: GET, HEAD
+```
+
+首部字段 Allow 用于 **`通知客户端能够支持 Request-URI 指定资源的所有 HTTP 方法`** 。当服务器接收到不支持的 HTTP 方法时，会以状态码 **`405 Method Not Allowed`** 作为响应返回。与此同时，还会把所有能支持的 HTTP 方法写入首部字段 Allow 后返回。
+
+
+
+#### 2. Content-Encoding
+
+```http
+Content-Encoding: gzip
+```
+
+首部字段 Content-Encoding 会告知客户端服务器对实体的主体部分选用的内容编码方式。内容编码是指在不丢失实体信息的前提下所进行的压缩。
+
+* **`gzip`**
+* **`compress`**
+* **`deflate`**
+* **`identity`**
+
+
+
+#### 3. Content-Language
+
+```http
+Content-Language: zh-CN
+```
+
+首部字段 Content-Language 会告知客户端， **`实体主体使用的自然语言`**（指中文或英文等语言）。
+
+
+
+#### 4. Content-Length
+
+```http
+Content-Length: 15000
+```
+
+首部字段 Content-Length 表明了 **`实体主体部分的大小（单位是字节）`** 。对实体主体进行内容编码传输时，不能再使用 Content-Length 首部字段。由于实体主体大小的计算方法略微复杂，所以在此不再展开。
+
+
+
+#### 5. Content-Location
+
+```http
+Content-Location: http://www.hackr.jp/index-ja.html
+```
+
+首部字段 Content-Location 给出与 **`报文主体部分相对应的 URI`** 。和首部字段 Location 不同，Content-Location 表示的是 **`报文主体返回资源对应的 URI`** 。比如，对于使用首部字段 Accept-Language 的服务器驱动型请求，当返回的页面内容与实际请求的对象不同时，首部字段 Content-Location 内会写明 URI。
+
+
+
+#### 6. Content-MD5
+
+```http
+Content-MD5: OGFKZDUwNGVHNGY3N2MxMDIwZmQ4NTBmY2IyTY==
+```
+
+
+
+#### 7. Content-Range
+
+```http
+Content-Range: bytes 5001-10000/10000
+```
+
+针对范围请求，返回响应时使用的首部字段 Content-Range，能告知客户端作为响应返回的实体的 **`哪个部分符合范围请求`** 。字段值以 **`字节`** 为单位，表示当前发送部分及整个实体大小。
+
+
+
+#### 8. Content-Type
+
+```http
+Content-Type: text/html; charset=UTF-8
+```
+
+首部字段 Content-Type 说明了实体主体内对象的媒体类型。和首部字段 Accept 一样，字段值用 type/subtype 形式赋值。参数 charset 使用 iso-8859-1 或 euc-jp 等字符集进行赋值。
+
+
+
+#### 9. Expires
+
+```http
+Expires: Wed, 04 Jul 2012 08:26:05 GMT
+```
+
+首部字段 Expires 会将 **`资源失效的日期告知客户端`** 。缓存服务器在接收到含有首部字段 Expires 的响应后，会以缓存来应答请求，在 Expires 字段值指定的时间之前，响应的副本会一直被保存。 **`当超过指定的时间后，缓存服务器在请求发送过来时，会转向源服务器请求资源`** 。源服务器不希望缓存服务器对资源缓存时，最好在 Expires 字段内写入与首部字段 Date 相同的时间值。但是，当首部字段 Cache-Control 有指定 max-age 指令时，比起首部字段 Expires，会优先处理 **`max-age`** 指令。
+
+
+
+#### 10. Last-Modified
+
+```http
+Last-Modified: Wed, 23 May 2012 09:59:55 GMT
+```
+
+首部字段 Last-Modified 指名 **`资源最终修改的时间`** 。一般来说，这个值就是 Request-URI 指定资源被修改的时间。但类似使用 CGI 脚本进行动态数据处理时，该值有可能会变成数据最终修改时的时间。
 
 
 
 
 
+### 6.7 为 Cookie 服务的首部字段
+
+下面的表格内列举了与 Cookie 有关的首部字段。
+
+* **`为 Cookie 服务的首部字段`**
+
+| 首部字段名 | 说明                             | 首部类型     |
+| ---------- | -------------------------------- | ------------ |
+| Set-Cookie | 开始状态管理所使用的 Cookie 信息 | 响应首部字段 |
+| Cookie     | 服务器接收到的 Cookie 信息       | 请求首部字段 |
+
+
+
+#### 1. Set-Cookie
+
+```                                                                                                                                                                         http
+Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31 GMT; => path=/;domain=.hackr.jp;
+```
+
+当服务器准备开始管理客户端的状态时，会事先先告知各种信息。下面的表格列举了 Set-Cookie 的字段值。
+
+* **`Set-Cookie 字段的属性`**
+
+| 属性         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| NAME=VALUE   | 赋予 Cookie 的名称和其值（必需项）                           |
+| expires=DATE | Cookie 的有效期（若不明确指定则默认为浏览器关闭前为止）      |
+| path=PATH    | 将服务器上的文件目录作为 Cookie 的适用对象（若不指定则默认为文档所在的文件目录） |
+| domain=域名  | 作为 Cookie 适用对象的域名（若不指定则默认为创建 Cookie 的服务器的域名） |
+| Secure       | 仅在 HTTPS 安全通信时才会发送 Cookie                         |
+| HttpOnly     | 加以限制，使 Cookie 不能被 JavaScript 脚本访问               |
+
+
+
+**`expires 属性`**
+
+Cookie 的 expires 属性指定浏览器可发送 Cookie 的有效期。当省略 expires 属性时，其有效期仅限于维持浏览器会话（Session）时间段内。这通常限于浏览器应用程序被关闭之前。另外，一旦 Cookie 从服务器发送至客户端，服务器端就不存在可以显式删除 Cookie 的方法。但可通过覆盖已过期的 Cookie，实现对客户端 Cookie 的实质性删除操作。
+
+
+
+**`path 属性`**
+
+Cookie 的 path 属性可用于限制指定 Cookie 的发送范围的文件目录。不过另有方法可避开这项限制，看来对其作为安全机制的效果不能抱有期待。
+
+
+
+**`domain 属性`**
+
+通过 Cookie 的 domain 属性指定的域名可做到与结尾匹配一致。比如，当指定 example.com 后，除 example.com 以外，**`www.example.com`** 或 **`www2.example.com`** 等都可以发送 Cookie。因此，除了针对具体指定的多个域名发送 Cookie 之外，不指定 domain 属性显得更安全。
+
+
+
+**`secure 属性`**
+
+Cookie 的 secure 属性用于限制 Web 页面仅在 HTTPS 安全连接时，才可以发送 Cookie。发送 Cookie 时，指定 secure 属性的方法如下所示。
+
+```http
+Set-Cookie: name=value; secure
+```
+
+以上例子仅当在 **`https://www.example.com/`**（HTTPS）安全连接的情况下才会 **`进行 Cookie 的回收`** 。也就是说，即使域名相同，**`http://www.example.com`**（HTTP）也不会发生 Cookie 回收行为。当省略 secure 属性时，不论 HTTP 还是 HTTPS，都会对 Cookie 进行回收。
+
+
+
+**`HttpOnly 属性`**
+
+Cookie 的 HttpOnly 属性是 **`Cookie 的扩展功能`** ， **`它使 JavaScript 脚本无法获得 Cookie`** 。其主要目的 **`为防止跨站脚本攻击（XSS）对 Cookie 的信息窃取`** 。发送指定 HttpOnly 属性的 Cookie 的方法如下所示。
+
+```http
+Set-Cookie: name=value; HttpOnly
+```
+
+通过上述设置，通常从 Web 页面内还可以对 Cookie 进行读取操作。但使用 JavaScript 的 document.cookie 就无法读取附加 HttpOnly 属性后的 Cookie 的内容了。因此，也就无法在 XSS 中利用 JavaScript 劫持 Cookie 了。虽然是独立的扩展功能，但 Internet Explorer 6 SP1 以上版本等当下的主流浏览器都已经支持该扩展了。另外顺带一提，该扩展并非是为了防止 XSS 而开发的。
+
+
+
+#### 2. Cookie
+
+```http
+Cookie: status=enable
+```
+
+首部字段 Cookie 会告知服务器，当客户端想获得 HTTP 状态管理支持时，就会在 **`请求中包含从服务器接收到的 Cookie`** 。接收到多个 Cookie 时，同样可以以多个 Cookie 形式发送。
 
 
 
 
 
+### 6.8 其他首部字段
+
+HTTP 首部字段是可以自行扩展的。所以在 Web 服务器和浏览器的应用上，会出现各种非标准的首部字段。接下来，我们就一些最为常用的首部字段进行说明。
+
+* **`X-Frame-Options`**
+* **`X-XSS-Protection`**
+* **`DNT`**
+* **`P3P`**
 
 
 
+#### 1. X-Frame-Options
 
+```http
+X-Frame-Options: DENY
+```
+
+首部字段 X-Frame-Options 属于 **`HTTP 响应首部`** ，用于 **`控制网站内容在其他 Web 网站的 Frame 标签内的显式问题`** 。其主要目的是 **`为了防止点击劫持攻击`** 。首部字段 X-Frame-Options 有以下两个可指定的字段值。
+
+
+
+* **`DENY`**：拒绝
+* **`SAMEORIGIN`**：仅同源域名下的页面匹配时许可。
+
+
+
+#### 2. X-XSS-Protection
+
+```http
+X-XSS-Protection: 1
+```
+
+首部字段 X-XSS-Protection 属于 **`HTTP 响应首部`** ，它是 **`针对跨站脚本攻击（XSS）的一种对策，用于控制浏览器 XSS 防护机制的开关`** 。首部字段 X-XSS-Protection 可指定的字段值如下。
+
+* 0：将 XSS 过滤设置成无效状态
+* 1：将 XSS 过滤设置成有效状态
+
+
+
+#### 3. DNT
+
+```http
+DNT: 1
+```
+
+首部字段 DNT 属于 **`HTTP 请求首部`** ，其中 DNT 是 Do Not Track 的简称，意为 **`拒绝个人信息被收集`** ，是表示 **`拒绝被精准广告追踪的一种方法`** 。首部字段 DNT 可指定的字段值如下。
+
+* 0：同意被追踪
+* 1：拒绝被追踪
+
+
+
+由于首部字段 DNT 的功能具备有效性，所以 Web 服务器需要对 DNT 做对应的支持。
+
+
+
+#### 4. P3P
+
+```http
+P3P: CP="CAO DSP LAW CURa ADMa DEVa TAIa PSAa PSDa" => IVAa IVDa OUR BUS IND UNI COM NAV INT"
+```
+
+首部字段 P3P 属于 **`HTTP 响应首部`** ，通过利用 P3P 技术，可以让 **`Web 网站上的个人隐私变成一种仅供程序可理解的形式，以达到保护用户隐私的目的`** 。要进行 P3P 的设定，需按以下操作步骤进行。
+
+步骤 1：创建 P3P 隐私
+
+步骤 2：创建 P3P 隐私对照文件后，保存命名在 /w3c/p3p.xml
+
+步骤 3：从 P3P 隐私中新建 Compact policies 后，输出到 HTT P 响应中
 
 
 
