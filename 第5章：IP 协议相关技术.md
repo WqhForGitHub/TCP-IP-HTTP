@@ -261,3 +261,18 @@ ICMP 的这种通知消息会使用 IP 进行发送。ICMP 的消息大致可以
 | 141            | 反邻居探索请求消息（Inverse Neighbor Discovery Solicitation） |
 | 142            | 反邻居探索宣告消息（Inverse Neighbor Discovery Advertisement） |
 
+
+
+
+
+### 5.5 DHCP
+
+
+
+### 5.6 NAT
+
+
+
+#### 1. NAT 定义
+
+NAT 是用于在本地网络中使用私有地址，在连接互联网时转而使用全局 IP 地址的技术。 除了转换 IP 地址外，还出现了可以转换TCP、UDP 端口号的 NAPT 技术，由此可以实现用一个全局 IP 地址与多个主机的通信。NAT 实际上是为正在面临地址枯竭的 IPv4 而开发的技术。不过，在 IPv6 中为了提高网络安全也在使用 NAT，在 IPv4 和 IPv6 之间的相互通信当中常常使用 NAT-PT。                                                                                                                                                                                                             
